@@ -43,12 +43,10 @@ Find the Elf carrying the most Calories. How many total Calories is that Elf car
 import os 
 from common import file_line_generator, MinHeap
 
-INPUT_PATH = os.path.join(os.path.dirname(__file__), "inputs/day_01", "input.txt")
-
 def puzzle(size: int = 1) -> int:
     max_calories = MinHeap(size) 
     curr_calories = 0
-    for line in file_line_generator(INPUT_PATH):
+    for line in file_line_generator(__file__):
         if len(line) > 0: 
             curr_calories += int(line)
         else:

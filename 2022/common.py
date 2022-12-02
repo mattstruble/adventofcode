@@ -2,10 +2,14 @@ import os
 from typing import Generator, AnyStr, Optional, Any
 
 import heapq
+from pathlib import Path
 
-def file_line_generator(path:str = None) -> Generator[AnyStr, None, None]:
+INPUTS_DIR = os.path.join(os.path.dirname(__file__), "inputs")
+INPUT_FILE_NAME = "input.txt"
+
+def file_line_generator(file_path, *, path:str = None) -> Generator[AnyStr, None, None]:
     if path is None:
-        path = "input.txt"
+        path = os.path.join(INPUTS_DIR, Path(file_path).stem, INPUT_FILE_NAME)
 
     with open(path, 'r') as file:
         for line in file:
