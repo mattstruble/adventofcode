@@ -41,27 +41,12 @@ In the example above, this is 24000 (carried by the fourth Elf).
 Find the Elf carrying the most Calories. How many total Calories is that Elf carrying?
 """
 import os 
-from typing import Generator, AnyStr, Optional, Any
-import heapq
-
 from common import file_line_generator, MinHeap
 
 INPUT_PATH = os.path.join(os.path.dirname(__file__), "inputs/day_01", "input.txt")
 
-def puzzle_one() -> int:
-    max_calories = 0 
-    curr_calories = 0
-    for line in file_line_generator(INPUT_PATH):
-        if len(line) > 0: 
-            curr_calories += int(line)
-        else:
-            max_calories = max(max_calories, curr_calories)
-            curr_calories = 0
-
-    return max_calories
-
-def puzzle_two() -> int:
-    max_calories = MinHeap(3) 
+def puzzle(size: int = 1) -> int:
+    max_calories = MinHeap(size) 
     curr_calories = 0
     for line in file_line_generator(INPUT_PATH):
         if len(line) > 0: 
@@ -73,5 +58,5 @@ def puzzle_two() -> int:
     return max_calories
 
 if __name__ == "__main__":
-    print(puzzle_one())
-    print(sum(puzzle_two()))
+    print(sum(puzzle()))
+    print(sum(puzzle(size=3)))
