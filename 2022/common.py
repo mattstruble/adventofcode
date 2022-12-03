@@ -4,6 +4,7 @@ from typing import Generator, AnyStr, Optional, Any, Iterable
 
 import heapq
 from pathlib import Path
+from functools import lru_cache
 
 INPUTS_DIR = os.path.join(os.path.dirname(__file__), "inputs")
 INPUT_FILE_NAME = "input.txt"
@@ -50,25 +51,34 @@ class PuzzleRunner:
             self.puzzle_two
         ]
 
-    def get_example(self) -> Iterable[AnyStr]:
+        self.test()
+        self.run()
+
+    def get_example_str(self) -> str: 
         raise NotImplementedError
 
-    def puzzle_one(self, data: Iterable[str]) -> int:
+    @lru_cache(maxsize=1)
+    def get_example(self) -> list[str]:
+        return [item.strip() for item in self.get_example_str().split("\n") if len(item) > 0]
+
+    def puzzle_one(self, data: list[str]) -> int:
         raise NotImplementedError
 
-    def puzzle_two(self, data: Iterable[str]) -> int:
+    def puzzle_two(self, data: list[str]) -> int:
         raise NotImplementedError
 
-    def _run(self, data: Iterable[str]) -> None:
+    def _run_puzzle(self, data_generator) -> None:
         for puzzle_func in self._puzzle_funcs:
             try: 
-                result = puzzle_func(data)
+                result = puzzle_func(data_generator())
                 print(f"{puzzle_func.__qualname__}: {result}")
             except NotImplementedError: 
                 print(f"{puzzle_func.__qualname__} not Implemented")
 
     def run(self):
-        self._run(file_line_generator())
+        print("\nRUN")
+        self._run_puzzle(file_line_generator)
 
     def test(self):
-        self._run(self.get_example())
+        print("\nTEST")
+        self._run_puzzle(self.get_example)

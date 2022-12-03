@@ -1,13 +1,4 @@
-from common import file_line_generator
-
-PUZZLE_ONE_EXAMPLE = [
-    "vJrwpWtwJgWrhcsFMMfFFhFp",
-    "jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL",
-    "PmmdzqPrVvPwwTWBwg",
-    "wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn",
-    "ttgJtRGJQctTZtZT",
-    "CrZsJsPPZsGzwwsLwLmpwMDw"
-]
+from common import file_line_generator, PuzzleRunner
 
 def get_priority(item):
     if ord(item) < 91:
@@ -15,46 +6,53 @@ def get_priority(item):
     else:
         return (ord(item) - ord("a") + 1)
 
-def puzzle_one(iter):
-    priority = 0 
+class Day3(PuzzleRunner):
 
-    for line in iter: 
-        compartment_one = set([])
-        compartment_two = set([])
+    def get_example_str(self) -> str:
+        return """
+                vJrwpWtwJgWrhcsFMMfFFhFp
+                jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+                PmmdzqPrVvPwwTWBwg
+                wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+                ttgJtRGJQctTZtZT
+                CrZsJsPPZsGzwwsLwLmpwMDw
+                """
 
-        for item in line[:len(line)//2]:
-            compartment_one.add(item)
+    def puzzle_one(self, data) -> int:
+        priority = 0 
 
-        for item in line[len(line)//2:]:
-            if item in compartment_one and item not in compartment_two:                
-                priority += get_priority(item)
+        for line in data: 
+            compartment_one = set([])
+            compartment_two = set([])
 
-            compartment_two.add(item)
+            for item in line[:len(line)//2]:
+                compartment_one.add(item)
 
-    return priority
+            for item in line[len(line)//2:]:
+                if item in compartment_one and item not in compartment_two:                
+                    priority += get_priority(item)
 
-def puzzle_two(iter):
-    priority = 0 
-    groups = {
-        -1: set([*"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"])
-    }
+                compartment_two.add(item)
 
-    curr_group = 0 
-    for line in iter: 
-        group = set([])
-        for item in line: 
-            if item in groups[curr_group-1]:
-                group.add(item)
+        return priority
 
-        if curr_group == 2:
-            priority += get_priority(group.pop())
+    def puzzle_two(self, data) -> int:
+        priority = 0 
+        groups = {}
+        curr_group = 0 
+        for line in data: 
+            group = set([])
+            for item in line: 
+                if curr_group == 0 or item in groups[curr_group-1]:
+                    group.add(item)
 
-        groups[curr_group] = group 
-        curr_group = (curr_group + 1) % 3
+            if curr_group == 2:
+                priority += get_priority(group.pop())
 
-    return priority
+            groups[curr_group] = group 
+            curr_group = (curr_group + 1) % 3
+
+        return priority
 
 
-if __name__ == "__main__":
-    print(puzzle_one(file_line_generator(__file__)))
-    print(puzzle_two(file_line_generator(__file__)))
+day_3 = Day3()
