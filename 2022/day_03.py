@@ -55,4 +55,4 @@ class Day3(PuzzleRunner):
         return priority
 
 
-day_3 = Day3()
+Day3()
