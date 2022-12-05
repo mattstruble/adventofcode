@@ -59,7 +59,7 @@ class PuzzleRunner:
 
     @lru_cache(maxsize=1)
     def get_example(self) -> list[str]:
-        return [item.strip() for item in self.get_example_str().split("\n") if len(item) > 0]
+        return [item for item in self.get_example_str().split("\n") if len(item) > 0]
 
     def puzzle_one(self, data: list[str]) -> int:
         raise NotImplementedError
@@ -77,7 +77,10 @@ class PuzzleRunner:
 
     def run(self):
         print("\nRUN")
-        self._run_puzzle(file_line_generator)
+        try:
+            self._run_puzzle(file_line_generator)
+        except FileNotFoundError:
+            print("No test file.")
 
     def test(self):
         print("\nTEST")
