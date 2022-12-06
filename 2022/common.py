@@ -1,13 +1,47 @@
 import os 
 import sys 
+import requests
 from typing import Generator, AnyStr, Optional, Any, Iterable
 
 import heapq
 from pathlib import Path
 from functools import lru_cache
 
+import configparser
+
 INPUTS_DIR = os.path.join(os.path.dirname(__file__), "inputs")
 INPUT_FILE_NAME = "input.txt"
+
+@lru_cache(maxsize=1)
+def get_configuration() ->configparser.ConfigParser:
+    config = configparser.ConfigParser()
+    config.read(os.path.join(os.path.dirname(__file__), "puzzle.cfg"))
+
+    return config 
+
+def download_input(file_path:Optional[str]=None): 
+    if file_path is None:
+        file_path = sys.argv[0]
+
+    filename = Path(file_path).stem
+
+    if os.path.exists(os.path.join(INPUTS_DIR, filename, INPUT_FILE_NAME)):
+        return 
+
+    input_num = int(filename.split("_")[1])
+
+    config = get_configuration()
+    cookies = {}
+    for key, value in config.items("requests.cookies"):
+        cookies[key] = value
+        
+
+    response = requests.get(f"https://adventofcode.com/2022/day/{input_num}/input", cookies=cookies)
+
+    os.makedirs(os.path.join(INPUTS_DIR, filename), exist_ok=True)
+
+    with open(os.path.join(INPUTS_DIR, filename, INPUT_FILE_NAME), 'wb') as f:
+        f.write(response.content)
 
 def file_line_generator(file_path=None, *, path:str = None) -> Generator[AnyStr, None, None]:
     if file_path is None:
@@ -50,6 +84,8 @@ class PuzzleRunner:
             self.puzzle_one,
             self.puzzle_two
         ]
+
+        download_input()
 
         self.test()
         self.run()
