@@ -1,16 +1,26 @@
 import os 
 import sys 
 import requests
-from typing import Generator, AnyStr, Optional, Any, Iterable
+from typing import Generator, AnyStr, Optional, Any, Iterable, List
 
 import heapq
 from pathlib import Path
 from functools import lru_cache
 
 import configparser
+import re 
 
 INPUTS_DIR = os.path.join(os.path.dirname(__file__), "inputs")
 INPUT_FILE_NAME = "input.txt"
+
+LETTERS = "abcdefghijklmnopqrstuvwxyz"
+
+UP, RIGHT, DOWN, LEFT = VDIRS = (0, -1), (1, 0), (0, 1), (-1, 0),
+DIRS = {'N': UP, 'E': RIGHT, 'S': DOWN, 'W': LEFT }
+ALL_DIRS = [(x, y) for x in [-1,0,1] for y in [-1,0,1] if not x == y == 0]
+
+def str_to_ints(string: str) -> List[int]:
+    return map(int, re.findall(r'(-?\d+).?', string))
 
 @lru_cache(maxsize=1)
 def get_configuration() ->configparser.ConfigParser:
