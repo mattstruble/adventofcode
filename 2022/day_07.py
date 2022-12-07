@@ -1,5 +1,38 @@
 from common import PuzzleRunner, str_to_ints
 
+class Node: 
+    def __init__(self, value=None, children:dict[str, "Node"]=None, parent:"Node"=None) -> None:
+        self.parent = parent 
+        self.children = children if children else {}
+        self.value = value 
+
+    def sum_values(self) -> int:
+        if self.value:
+            return self.value 
+
+        return sum([child.sum_values() for child in self.children.values()])
+        
+    def up(self) -> "Node":
+        return self.parent
+
+    def down(self, name) -> "Node":
+        return self.children[name]
+
+    def add_child(self, name, value=None, children=None): 
+        self.children[name] = Node(value=value, children=children, parent=self)
+
+def node_iterator(root:Node):
+    queue = [root]
+    visited = set([])
+    while queue: 
+        node = queue.pop()
+
+        if node not in visited:
+            yield node 
+
+            queue.extend(node.children.values())
+
+
 class Day7(PuzzleRunner):
 
     def get_example_str(self) -> str:
