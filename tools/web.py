@@ -108,6 +108,6 @@ class AOCWebInterface:
 
         # hack for now, will change when get live response next day
         return (
-            "that is right!" in response.content.lower()
-            and "gold star" in response.content.lower()
+            "that is right!" in response.content.decode("utf-8").lower()
+            and "gold star" in response.content.decode("utf-8").lower()
         )

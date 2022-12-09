@@ -28,13 +28,17 @@ class Singleton:
         return cls.instance
 
 
-def extract_day_from_path(file_path: Optional[str] = None) -> int:
+def get_file_stem(file_path: Optional[str] = None) -> str:
     if file_path is None:
         file_path = sys.argv[0]
 
     filename = Path(file_path).stem
 
-    return int(filename.split("_")[1])
+    return filename
+
+
+def extract_day_from_path(file_path: Optional[str] = None) -> int:
+    return int(get_file_stem(file_path).split("_")[1])
 
 
 def extract_year_from_path(file_path: Optional[str] = None) -> int:
