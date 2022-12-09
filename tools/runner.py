@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 from functools import lru_cache
 
-from tools.utils import file_line_generator
+from tools.utils import (
+    extract_num_from_path,
+    extract_year_from_path,
+    file_line_generator,
+)
 from tools.web import download_input
 
 
@@ -9,7 +13,10 @@ class PuzzleRunner:
     def __init__(self, test_only=False) -> None:
         self._puzzle_funcs = [self.puzzle_one, self.puzzle_two]
 
-        download_input()
+        self.puzzle_num = extract_num_from_path()
+        self.year = extract_year_from_path()
+
+        download_input(self.year, self.puzzle_num)
 
         self.test()
         if not test_only:

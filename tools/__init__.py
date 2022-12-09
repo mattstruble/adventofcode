@@ -10,7 +10,12 @@ def str_to_ints(string: str) -> List[int]:
 
 
 INPUTS_DIR = os.path.join(os.path.dirname(sys.argv[0]), "inputs")
+os.makedirs(INPUTS_DIR, exist_ok=True)
+
 INPUT_FILE_NAME = "input.txt"
+
+CACHE_DIR = os.path.join(os.path.dirname(INPUTS_DIR), ".cache")
+os.makedirs(CACHE_DIR, exist_ok=True)
 
 LETTERS = "abcdefghijklmnopqrstuvwxyz"
 
