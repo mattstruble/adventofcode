@@ -2,6 +2,7 @@
 import json
 import os
 import time
+from typing import Optional
 
 import requests
 
@@ -46,21 +47,35 @@ class RequestLimiter(Singleton):
         return requests.get(url, **kwargs)
 
 
-def download_input(year: int, puzzle_num: int):
-    path_str = f"day_{puzzle_num:02d}"
-    if os.path.exists(os.path.join(INPUTS_DIR, path_str, INPUT_FILE_NAME)):
-        return
+class AOCWebInterface:
+    """Interfaces with AOC"""
 
-    config = get_configuration()
-    cookies = {}
-    for key, value in config.items("requests.cookies"):
-        cookies[key] = value
+    def __init__(self, year: int, day: int) -> None:
+        self.year = year
+        self.day = day
+        self.day_str = f"day_{day:02d}"
+        self.request_limit = RequestLimiter()
 
-    response = RequestLimiter().get(
-        f"https://adventofcode.com/{year}/day/{puzzle_num}/input", cookies=cookies
-    )
+        config = get_configuration()
+        cookies = {}
+        for key, value in config.items("requests.cookies"):
+            cookies[key] = value
 
-    os.makedirs(os.path.join(INPUTS_DIR, path_str), exist_ok=True)
+        self.request_kwargs = {"cookies": cookies}
 
-    with open(os.path.join(INPUTS_DIR, path_str, INPUT_FILE_NAME), "wb") as f:
-        f.write(response.content)
+    def download_input(self, path: Optional[str] = None) -> None:
+        if path is None:
+            path = os.path.join(INPUTS_DIR, self.day_str, INPUT_FILE_NAME)
+
+        if os.path.exists(path):
+            return
+
+        response = self.request_limit.get(
+            f"https://adventofcode.com/{self.year}/day/{self.day}/input",
+            **self.request_kwargs,
+        )
+
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+
+        with open(path, "wb") as f:
+            f.write(response.content)

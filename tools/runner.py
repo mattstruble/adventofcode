@@ -2,21 +2,22 @@
 from functools import lru_cache
 
 from tools.utils import (
-    extract_num_from_path,
+    extract_day_from_path,
     extract_year_from_path,
     file_line_generator,
 )
-from tools.web import download_input
+from tools.web import AOCWebInterface
 
 
 class PuzzleRunner:
     def __init__(self, test_only=False) -> None:
         self._puzzle_funcs = [self.puzzle_one, self.puzzle_two]
 
-        self.puzzle_num = extract_num_from_path()
+        self.day = extract_day_from_path()
         self.year = extract_year_from_path()
 
-        download_input(self.year, self.puzzle_num)
+        self.aoc = AOCWebInterface(self.year, self.day)
+        self.aoc.download_input()
 
         self.test()
         if not test_only:

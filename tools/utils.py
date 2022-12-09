@@ -28,7 +28,7 @@ class Singleton:
         return cls.instance
 
 
-def extract_num_from_path(file_path: Optional[str] = None) -> int:
+def extract_day_from_path(file_path: Optional[str] = None) -> int:
     if file_path is None:
         file_path = sys.argv[0]
 
