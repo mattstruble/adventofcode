@@ -32,8 +32,7 @@ class PuzzleRunner:
         self.aoc = AOCWebInterface(self.year, self.day)
         self.aoc.download_input()
 
-        self.test_only = test_only
-        self.run()
+        self.run(test_only)
 
     def _load_solutions(self) -> dict:
         try:
@@ -86,7 +85,7 @@ class PuzzleRunner:
 
         return result
 
-    def run(self):
+    def run(self, test_only: bool = False):
         for i, puzzle_func in enumerate(self._puzzle_funcs):
             func_name = puzzle_func.__qualname__
 
@@ -101,7 +100,7 @@ class PuzzleRunner:
             )
             print(f"TEST {func_name}: {test_results}")
 
-            if not self.test_only:
+            if not test_only:
                 run_results = self._run_puzzle(
                     puzzle_func=puzzle_func, data_generator=file_line_generator
                 )
