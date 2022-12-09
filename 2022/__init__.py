@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 import os
-import sys 
+import sys
 
 sys.path.append(os.path.abspath(".."))
 

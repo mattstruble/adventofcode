@@ -1,10 +1,11 @@
-
-from typing import Optional
+# -*- coding: utf-8 -*-
 import heapq
+from typing import Optional
+
 
 class MinHeap:
     def __init__(self, max_size: Optional[int] = None):
-        self.max_size = max_size 
+        self.max_size = max_size
         self.heap = []
 
     def push(self, x: Any):
@@ -16,7 +17,7 @@ class MinHeap:
     def pop(self):
         return heapq.heappop(self.h)
 
-    def __getitem__(self, i) -> Any: 
+    def __getitem__(self, i) -> Any:
         return self.heap[i]
 
     def __len__(self):

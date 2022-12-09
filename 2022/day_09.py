@@ -1,22 +1,21 @@
-from tools import RIGHT, UP, DOWN, LEFT
-from tools.runner import PuzzleRunner
-from math import sqrt, pow
+# -*- coding: utf-8 -*-
+from math import pow, sqrt
 
-dir_map = {
-    "U": UP, 
-    "R": RIGHT, 
-    "L": LEFT,
-    "D": DOWN
-}
+from tools import DOWN, LEFT, RIGHT, UP
+from tools.runner import PuzzleRunner
+
+dir_map = {"U": UP, "R": RIGHT, "L": LEFT, "D": DOWN}
+
 
 def distance(p1, p2) -> int:
     return sqrt(pow(p1[0] - p2[0], 2) + pow(p1[1] - p2[1], 2))
 
+
 def clamp(n, smallest, largest):
     return max(smallest, min(n, largest))
 
-class Day9(PuzzleRunner):
 
+class Day9(PuzzleRunner):
     def get_example_str(self) -> str:
         return """R 5
 U 8
@@ -31,7 +30,7 @@ U 20"""
         head_pos = prev_head = (0, 0)
         tail_pos = (0, 0)
         tail_visited = set(tail_pos)
-        for line in data: 
+        for line in data:
             direction, steps = line.split(" ")
             direction = dir_map[direction]
 
@@ -40,7 +39,7 @@ U 20"""
                 if distance(head_pos, tail_pos) > 1.5:
                     tail_pos = prev_head
                     tail_visited.add(tail_pos)
-                
+
                 prev_head = head_pos
 
         return len(tail_visited)
@@ -49,8 +48,8 @@ U 20"""
         knots = [(0, 0)] * 10
         prev_positions = [(0, 0)] * 10
         tail_visited = set([knots[-1]])
-        
-        for line in data: 
+
+        for line in data:
             dir_str, steps = line.split(" ")
             direction = dir_map[dir_str]
 
@@ -59,15 +58,18 @@ U 20"""
                 knots[0] = (knots[0][0] + direction[0], knots[0][1] + direction[1])
 
                 for i in range(1, len(knots)):
-                    if distance(knots[i-1], knots[i]) > 1.5:
+                    if distance(knots[i - 1], knots[i]) > 1.5:
                         prev_positions[i] = knots[i]
-                        diag =clamp(knots[i-1][0] - knots[i][0], -1, 1), clamp(knots[i-1][1] - knots[i][1], -1, 1)
+                        diag = clamp(knots[i - 1][0] - knots[i][0], -1, 1), clamp(
+                            knots[i - 1][1] - knots[i][1], -1, 1
+                        )
                         knots[i] = (knots[i][0] + diag[0], knots[i][1] + diag[1])
                     else:
-                        break 
-                
+                        break
+
                 tail_visited.add(knots[-1])
 
         return len(tail_visited)
+
 
 Day9()

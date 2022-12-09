@@ -1,14 +1,13 @@
+# -*- coding: utf-8 -*-
 from functools import lru_cache
-from tools.web import download_input
+
 from tools.utils import file_line_generator
+from tools.web import download_input
 
-class PuzzleRunner: 
 
+class PuzzleRunner:
     def __init__(self, test_only=False) -> None:
-        self._puzzle_funcs = [
-            self.puzzle_one,
-            self.puzzle_two
-        ]
+        self._puzzle_funcs = [self.puzzle_one, self.puzzle_two]
 
         download_input()
 
@@ -16,7 +15,7 @@ class PuzzleRunner:
         if not test_only:
             self.run()
 
-    def get_example_str(self) -> str: 
+    def get_example_str(self) -> str:
         raise NotImplementedError
 
     @lru_cache(maxsize=1)
@@ -31,10 +30,10 @@ class PuzzleRunner:
 
     def _run_puzzle(self, data_generator) -> None:
         for puzzle_func in self._puzzle_funcs:
-            try: 
+            try:
                 result = puzzle_func(data_generator())
                 print(f"{puzzle_func.__qualname__}: {result}")
-            except NotImplementedError: 
+            except NotImplementedError:
                 print(f"{puzzle_func.__qualname__} not Implemented")
 
     def run(self):
