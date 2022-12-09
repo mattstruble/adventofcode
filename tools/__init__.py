@@ -46,6 +46,7 @@ INPUTS_DIR = os.path.join(os.path.dirname(sys.argv[0]), "inputs")
 os.makedirs(INPUTS_DIR, exist_ok=True)
 
 INPUT_FILE_NAME = "input.txt"
+EXAMPLE_FILE_NAME = "example.txt"
 
 CACHE_DIR = os.path.join(os.path.dirname(INPUTS_DIR), ".cache")
 os.makedirs(CACHE_DIR, exist_ok=True)
@@ -54,6 +55,7 @@ SOLUTION_DIR = os.path.join(os.path.dirname(INPUTS_DIR), "solutions")
 os.makedirs(SOLUTION_DIR, exist_ok=True)
 
 LETTERS = "abcdefghijklmnopqrstuvwxyz"
+NUMBERS = "0123456789"
 
 UP, RIGHT, DOWN, LEFT = ORTHO_DIRS = (
     (0, -1),
