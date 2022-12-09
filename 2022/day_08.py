@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from tools import VDIRS
+from tools import ORTHO_DIRS
 from tools.runner import PuzzleRunner
 
 
@@ -94,7 +94,7 @@ class Day8(PuzzleRunner):
         max_view = -1
         for tree in visible:
             view = 1
-            for dir in VDIRS:
+            for dir in ORTHO_DIRS:
                 distance = 0
                 x = tree[0]
                 y = tree[1]
