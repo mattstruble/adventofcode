@@ -17,6 +17,9 @@ class MinHeap:
     def pop(self):
         return heapq.heappop(self.h)
 
+    def peak(self):
+        return self.heap[0]
+
     def __getitem__(self, i) -> Any:
         return self.heap[i]
 
@@ -25,6 +28,33 @@ class MinHeap:
 
     def __str__(self) -> str:
         return str(self.heap)
+
+
+class MaxHeap(MinHeap):
+    class Comparator:
+        def __init__(self, val):
+            self.val = val
+
+        def __lt__(self, other):
+            return self.val > self.other
+
+        def __eq__(self, other):
+            return self.val == self.other
+
+        def __str__(self):
+            return str(self.val)
+
+    def push(self, x: Any):
+        return super().push(MaxHeap.Comparator(x))
+
+    def pop(self):
+        return super().pop().val
+
+    def peak(self):
+        return super().peak().val
+
+    def __getitem__(self, i) -> Any:
+        return super().__getitem__(i).val
 
 
 class Node:
