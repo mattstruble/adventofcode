@@ -1,4 +1,4 @@
-from common import file_line_generator, PuzzleRunner
+from tools.runner import PuzzleRunner
 
 def get_priority(item):
     if ord(item) < 91:

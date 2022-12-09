@@ -1,4 +1,5 @@
-from common import PuzzleRunner, RIGHT, UP, DOWN, LEFT
+from tools import RIGHT, UP, DOWN, LEFT
+from tools.runner import PuzzleRunner
 from math import sqrt, pow
 
 dir_map = {

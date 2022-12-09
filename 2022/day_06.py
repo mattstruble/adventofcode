@@ -1,4 +1,4 @@
-from common import PuzzleRunner
+from tools.runner import PuzzleRunner
 
 class Day6(PuzzleRunner):
 

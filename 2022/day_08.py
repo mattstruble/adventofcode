@@ -1,4 +1,5 @@
-from common import PuzzleRunner, VDIRS
+from tools.runner import PuzzleRunner
+from tools import VDIRS
 
 class Day8(PuzzleRunner):
     

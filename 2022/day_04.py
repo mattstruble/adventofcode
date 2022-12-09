@@ -1,4 +1,4 @@
-from common import PuzzleRunner
+from tools.runner import PuzzleRunner
 
 def get_assignments(line: str) -> list[tuple]:
     assignments = line.split(",")

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from common import file_line_generator
+from tools.utils import file_line_generator
 
 class Moves(Enum):
     ROCK = 1

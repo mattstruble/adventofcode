@@ -1,4 +1,4 @@
-from common import PuzzleRunner, str_to_ints
+from tools.runner import PuzzleRunner, str_to_ints
 
 
 class Node: 
