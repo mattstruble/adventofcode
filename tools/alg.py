@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import heapq
-from typing import Optional
+from typing import Any, Optional
 
 
 class MinHeap:
