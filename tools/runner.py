@@ -5,7 +5,7 @@ from datetime import datetime
 from functools import lru_cache
 from typing import Any, Optional
 
-from tools import SOLUTION_DIR
+from tools import CACHE_DIR
 from tools.utils import (
     extract_day_from_path,
     extract_year_from_path,
@@ -13,6 +13,8 @@ from tools.utils import (
     get_file_stem,
 )
 from tools.web import AOCWebInterface
+
+SOLUTIONS_FILE = os.path.join(CACHE_DIR, "solutions.json")
 
 
 class PuzzleRunner:
@@ -36,7 +38,7 @@ class PuzzleRunner:
 
     def _load_solutions(self) -> dict:
         try:
-            with open(os.path.join(SOLUTION_DIR, f"{self.name}.json"), "r") as f:
+            with open(SOLUTIONS_FILE, "r") as f:
                 solutions = json.load(f)
         except FileNotFoundError:
             solutions = {}
@@ -53,7 +55,7 @@ class PuzzleRunner:
             "test_result": test_result,
         }
 
-        with open(os.path.join(SOLUTION_DIR, f"{self.name}.json"), "w") as f:
+        with open(SOLUTIONS_FILE, "w") as f:
             json.dump(self.solutions, f)
 
     def get_example_str(self) -> str:

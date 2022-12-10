@@ -51,9 +51,6 @@ EXAMPLE_FILE_NAME = "example.txt"
 CACHE_DIR = os.path.join(os.path.dirname(INPUTS_DIR), ".cache")
 os.makedirs(CACHE_DIR, exist_ok=True)
 
-SOLUTION_DIR = os.path.join(os.path.dirname(INPUTS_DIR), "solutions")
-os.makedirs(SOLUTION_DIR, exist_ok=True)
-
 LETTERS = "abcdefghijklmnopqrstuvwxyz"
 NUMBERS = "0123456789"
 
