@@ -71,7 +71,11 @@ class AOCWebInterface:
         for key, value in config.items("requests.cookies"):
             cookies[key] = value
 
-        self.request_kwargs = {"cookies": cookies}
+        headers = {
+            "User-Agent": "github.com/mattstruble/adventofcode by twitter.com/mestruble"
+        }
+
+        self.request_kwargs = {"cookies": cookies, "headers": headers}
 
     def download_input(self, path: Optional[str] = None) -> None:
         if path is None:
@@ -152,21 +156,9 @@ class AOCWebInterface:
     def submit(self, puzzle_num: int, solution: Union[str, int, float]) -> bool:
         data = {"level": puzzle_num, "answer": solution}
 
-        headers = {
-            "Origin": "https://adventofcode.com",
-            "DNT": "1",
-            "Connection": "keep-alive",
-            "Referer": f"https://adventofcode.com/{self.year}/day/{self.day}",
-            "Sec-Fetch-Dest": "document",
-            "Sec-Fetch-Mode": "navigate",
-            "Sec-Fetch-Site": "same-origin",
-        }
-
         url = f"https://adventofcode.com/{self.year}/day/{self.day}/answer"
 
-        response = self.request_limit.post(
-            url, data=data, headers=headers, **self.request_kwargs
-        )
+        response = self.request_limit.post(url, data=data, **self.request_kwargs)
 
         print(response.content)
 
