@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import os
+import re
 import time
 from functools import lru_cache
 from typing import Optional, Union
@@ -89,14 +90,17 @@ class AOCWebInterface:
             f.write(response.content)
 
     @lru_cache()
-    def _get_day_article(self) -> str:
+    def _get_day_article(self, puzzle_num=1) -> str:
         cache_fname = os.path.join(CACHE_DIR, f"{self.day_str}.html")
 
         if os.path.exists(cache_fname):
             with open(cache_fname, "r") as f:
-                html = f.readlines()
+                html = f.read()
 
-            return html
+            # If we have both articles early return
+            soup = BeautifulSoup(html, "html.parser")
+            if len(soup.findAll("article")) >= puzzle_num:
+                return html
 
         url = f"https://adventofcode.com/{self.year}/day/{self.day}"
 
@@ -110,17 +114,38 @@ class AOCWebInterface:
 
         return article
 
-    def download_prompt(self, path: Optional[str] = None) -> None:
+    def download_prompt(self, puzzle_num: int = 1, path: Optional[str] = None) -> None:
         if path is None:
             path = os.path.join(INPUTS_DIR, self.day_str, "README.md")
 
-        if os.path.exists(path):
-            return
-
-        article = self._get_day_article()
+        article = self._get_day_article(puzzle_num)
 
         with open(path, "w") as f:
             f.write(markdownify.markdownify(str(article), heading_style="ATX"))
+
+    def download_examples(
+        self, puzzle_num: int = 1, path: Optional[str] = None
+    ) -> None:
+        if path is None:
+            path = os.path.join(INPUTS_DIR, self.day_str)
+
+        article = self._get_day_article(puzzle_num)
+
+        soup = BeautifulSoup(article, "html.parser")
+        articles = soup.findAll("article")
+
+        for i, article in enumerate(articles):
+            examples = article.findAll(
+                "p", text=re.compile("(?:f|F)or (?:example|example:)", re.IGNORECASE)
+            )
+            print(examples)
+            for example in examples:
+                try:
+                    pre = example.find_next_sibling("pre")
+                    with open(os.path.join(path, f"EXAMPLE_{i+1}.txt"), "w") as f:
+                        f.write(str(pre.code.text.strip()))
+                except Exception as e:
+                    print(e)
 
     def submit(self, puzzle_num: int, solution: Union[str, int, float]) -> bool:
         data = {"level": puzzle_num, "answer": solution}

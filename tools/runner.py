@@ -34,6 +34,7 @@ class PuzzleRunner:
         self.aoc = AOCWebInterface(self.year, self.day)
         self.aoc.download_input()
         self.aoc.download_prompt()
+        self.aoc.download_examples()
 
         self.run(test_only)
 
@@ -98,6 +99,14 @@ class PuzzleRunner:
                 )
                 continue
 
+            if (
+                i > 0
+                and not self.solutions[self._puzzle_funcs[i - 1].__qualname__][
+                    "correct"
+                ]
+            ):
+                break  # break if previous puzzle is wrong
+
             test_results = self._run_puzzle(
                 puzzle_func=puzzle_func, data_generator=self.get_example
             )
@@ -118,3 +127,5 @@ class PuzzleRunner:
                     print("Correct!" if correct else "Wrong!")
 
                     self._save(func_name, run_results, correct, test_results)
+
+            self.aoc.download_prompt(i + 1)

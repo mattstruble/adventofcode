@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from tools.runner import PuzzleRunner, str_to_ints
+from tools import str_to_ints
+from tools.runner import PuzzleRunner
 
 
 class Node:
