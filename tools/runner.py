@@ -2,7 +2,6 @@
 import json
 import os
 from datetime import datetime
-from functools import lru_cache
 from typing import Any, Optional
 
 from tools import CACHE_DIR
@@ -63,9 +62,19 @@ class PuzzleRunner:
     def get_example_str(self) -> str:
         raise NotImplementedError
 
-    @lru_cache(maxsize=1)
-    def get_example(self) -> list[str]:
-        return [item for item in self.get_example_str().split("\n") if len(item) > 0]
+    def get_example(self, puzzle_num=1) -> list[str]:
+        try:
+            return [
+                item for item in self.get_example_str().split("\n") if len(item) > 0
+            ]
+        except NotImplementedError:
+            while puzzle_num > 0:
+                try:
+                    return file_line_generator(file_name=f"EXAMPLE_{puzzle_num}.txt")
+                except FileNotFoundError:
+                    pass
+
+        raise NotImplementedError
 
     def puzzle_one_example_solution(self) -> Any:
         return None
@@ -129,3 +138,4 @@ class PuzzleRunner:
                     self._save(func_name, run_results, correct, test_results)
 
             self.aoc.download_prompt(i + 1)
+            self.aoc.download_examples(i + 1)

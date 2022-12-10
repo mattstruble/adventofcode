@@ -135,10 +135,12 @@ class AOCWebInterface:
         articles = soup.findAll("article")
 
         for i, article in enumerate(articles):
+            if os.path.exists(os.path.join(path, f"EXAMPLE_{i+1}.txt")):
+                continue
+
             examples = article.findAll(
                 "p", text=re.compile("(?:f|F)or (?:example|example:)", re.IGNORECASE)
             )
-            print(examples)
             for example in examples:
                 try:
                     pre = example.find_next_sibling("pre")
