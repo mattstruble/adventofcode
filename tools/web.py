@@ -50,7 +50,7 @@ class RequestLimiter(Singleton):
 
     def post(self, url, **kwargs):
         self._wait(url, self.POST_RATE_SEC)
-        return requests.get(url, **kwargs)
+        return requests.post(url, **kwargs)
 
 
 class AOCWebInterface:
