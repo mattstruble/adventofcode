@@ -33,6 +33,7 @@ class PuzzleRunner:
 
         self.aoc = AOCWebInterface(self.year, self.day)
         self.aoc.download_input()
+        self.aoc.download_prompt()
 
         self.run(test_only)
 

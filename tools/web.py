@@ -2,9 +2,12 @@
 import json
 import os
 import time
+from functools import lru_cache
 from typing import Optional, Union
 
+import markdownify
 import requests
+from bs4 import BeautifulSoup
 
 from tools import CACHE_DIR, INPUT_FILE_NAME, INPUTS_DIR
 from tools.config import get_configuration
@@ -84,6 +87,40 @@ class AOCWebInterface:
 
         with open(path, "wb") as f:
             f.write(response.content)
+
+    @lru_cache()
+    def _get_day_article(self) -> str:
+        cache_fname = os.path.join(CACHE_DIR, f"{self.day_str}.html")
+
+        if os.path.exists(cache_fname):
+            with open(cache_fname, "r") as f:
+                html = f.readlines()
+
+            return html
+
+        url = f"https://adventofcode.com/{self.year}/day/{self.day}"
+
+        response = self.request_limit.get(url, **self.request_kwargs)
+
+        soup = BeautifulSoup(response.content, "html.parser")
+        article = "".join([str(article) for article in soup.findAll("article")])
+
+        with open(cache_fname, "w") as f:
+            f.write(article)
+
+        return article
+
+    def download_prompt(self, path: Optional[str] = None) -> None:
+        if path is None:
+            path = os.path.join(INPUTS_DIR, self.day_str, "README.md")
+
+        if os.path.exists(path):
+            return
+
+        article = self._get_day_article()
+
+        with open(path, "w") as f:
+            f.write(markdownify.markdownify(str(article), heading_style="ATX"))
 
     def submit(self, puzzle_num: int, solution: Union[str, int, float]) -> bool:
         data = {"level": puzzle_num, "answer": solution}

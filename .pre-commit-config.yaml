@@ -82,3 +82,10 @@ repos:
         types: [python]
         stages: [commit]
         exclude: docs
+
+  # Fix markdown lints
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.32.2
+    hooks:
+      - id: markdownlint-fix
+        args: ["--fix", "--config", "markdownlintrc.ini"]
