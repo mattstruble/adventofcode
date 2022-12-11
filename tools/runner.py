@@ -72,7 +72,7 @@ class PuzzleRunner:
                 try:
                     return file_line_generator(file_name=f"EXAMPLE_{puzzle_num}.txt")
                 except FileNotFoundError:
-                    pass
+                    puzzle_num -= 1
 
         raise NotImplementedError
 
