@@ -163,7 +163,8 @@ class AOCWebInterface:
         print(response.content)
 
         # hack for now, will change when get live response next day
-        return (
-            "that is right!" in response.content.decode("utf-8").lower()
-            and "gold star" in response.content.decode("utf-8").lower()
+        return "the right answer!" in response.content.decode(
+            "utf-8"
+        ).lower() and '<span class="day-success">one gold star</span>' in response.content.decode(
+            "utf-8"
         )
