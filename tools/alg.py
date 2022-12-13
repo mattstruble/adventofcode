@@ -1,6 +1,79 @@
 # -*- coding: utf-8 -*-
 import heapq
-from typing import Any, Optional
+from math import sqrt
+from typing import Any, Optional, Union
+
+from tools import clamp
+
+
+class Point:
+    x: int
+    y: int
+
+    def __init__(self, x: Union[int, tuple], y: Optional[int] = None):
+        if isinstance(x, tuple) and y is not None:
+            raise ValueError("X cannot be a tuple, and pass in y.")
+        if isinstance(x, tuple) and y is None:
+            self.x = x[0]
+            self.y = x[1]
+        elif y is not None:
+            self.x = x
+            self.y = y
+
+    def __sub__(self, other) -> "Point":
+        if isinstance(other, Point):
+            return Point(self.x - other.x, self.y - other.y)
+        elif isinstance(other, (float, int)):
+            return Point(self.x - other, self.y - other)
+
+    def __add__(self, other) -> "Point":
+        if isinstance(other, Point):
+            return Point(self.x + other.x, self.y + other.y)
+        elif isinstance(other, (float, int)):
+            return Point(self.x + other, self.y + other)
+
+    def __mul__(self, other) -> "Point":
+        if isinstance(other, Point):
+            return Point(self.x * other.x, self.y * other.y)
+        elif isinstance(other, (float, int)):
+            return Point(self.x * other, self.y * other)
+
+    def __truediv__(self, other) -> "Point":
+        if isinstance(other, Point):
+            return Point(self.x / other.x, self.y / other.y)
+        elif isinstance(other, (float, int)):
+            return Point(self.x / other, self.y / other)
+
+    def __eq__(self, other):
+        return isinstance(other, Point) and self.x == other.x and self.y == other.y
+
+    def normalise(self) -> "Point":
+        return Point(clamp(self.x, -1, 1), clamp(self.y, -1, 1))
+
+    def manhatten(self, other) -> int:
+        if not isinstance(other, Point):
+            raise ValueError(
+                f"Cannot calculate the distance between Point and [{type(other)}]"
+            )
+
+        return sqrt(pow(self.x - other.x, 2) + pow(self.y - other.y, 2))
+
+    def chebyshev(self, other) -> int:
+        if not isinstance(other, Point):
+            raise ValueError(
+                f"Cannot calculate the distance between Point and [{type(other)}]"
+            )
+
+        return max(abs(self.x - other.x), abs(self.y - other.y))
+
+    def __hash__(self) -> int:
+        return hash((self.x, self.y))
+
+    def __str__(self) -> str:
+        return f"Point({self.x}, {self.y})"
+
+    def __repr__(self) -> str:
+        return str(self)
 
 
 class MinHeap:

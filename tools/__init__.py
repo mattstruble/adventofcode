@@ -5,6 +5,8 @@ import sys
 from math import sqrt
 from typing import Any, Callable, Iterable, List, Tuple, Union
 
+from tools.alg import Point
+
 
 def str_to_ints(string: str) -> List[int]:
     return list(map(int, re.findall(r"(-?\d+).?", string)))
@@ -55,10 +57,10 @@ LETTERS = "abcdefghijklmnopqrstuvwxyz"
 NUMBERS = "0123456789"
 
 UP, RIGHT, DOWN, LEFT = ORTHO_DIRS = (
-    (0, -1),
-    (1, 0),
-    (0, 1),
-    (-1, 0),
+    Point(0, -1),
+    Point(1, 0),
+    Point(0, 1),
+    Point(-1, 0),
 )
 DIRS = {
     "N": UP,
@@ -70,4 +72,4 @@ DIRS = {
     "L": LEFT,
     "D": DOWN,
 }
-ALL_DIRS = [(x, y) for x in [-1, 0, 1] for y in [-1, 0, 1] if not x == y == 0]
+ALL_DIRS = [Point(x, y) for x in [-1, 0, 1] for y in [-1, 0, 1] if not x == y == 0]

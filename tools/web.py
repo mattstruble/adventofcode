@@ -160,8 +160,6 @@ class AOCWebInterface:
 
         response = self.request_limit.post(url, data=data, **self.request_kwargs)
 
-        print(response.content)
-
         # hack for now, will change when get live response next day
         return "the right answer!" in response.content.decode(
             "utf-8"
