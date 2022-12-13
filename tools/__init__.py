@@ -5,8 +5,6 @@ import sys
 from math import sqrt
 from typing import Any, Callable, Iterable, List, Tuple, Union
 
-from tools.alg import Point
-
 
 def str_to_ints(string: str) -> List[int]:
     return list(map(int, re.findall(r"(-?\d+).?", string)))
@@ -44,6 +42,10 @@ def clamp(
     return max(smallest, min(n, largest))
 
 
+def cmp(x, y):
+    return (x > y) - (x < y)
+
+
 INPUTS_DIR = os.path.join(os.path.dirname(sys.argv[0]), "inputs")
 os.makedirs(INPUTS_DIR, exist_ok=True)
 
@@ -55,21 +57,3 @@ os.makedirs(CACHE_DIR, exist_ok=True)
 
 LETTERS = "abcdefghijklmnopqrstuvwxyz"
 NUMBERS = "0123456789"
-
-UP, RIGHT, DOWN, LEFT = ORTHO_DIRS = (
-    Point(0, -1),
-    Point(1, 0),
-    Point(0, 1),
-    Point(-1, 0),
-)
-DIRS = {
-    "N": UP,
-    "E": RIGHT,
-    "S": DOWN,
-    "W": LEFT,
-    "U": UP,
-    "R": RIGHT,
-    "L": LEFT,
-    "D": DOWN,
-}
-ALL_DIRS = [Point(x, y) for x in [-1, 0, 1] for y in [-1, 0, 1] if not x == y == 0]

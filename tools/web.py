@@ -160,9 +160,15 @@ class AOCWebInterface:
 
         response = self.request_limit.post(url, data=data, **self.request_kwargs)
 
-        # hack for now, will change when get live response next day
-        return "the right answer!" in response.content.decode(
-            "utf-8"
-        ).lower() and '<span class="day-success">one gold star</span>' in response.content.decode(
-            "utf-8"
+        soup = BeautifulSoup(response.content, "html.parser")
+        article = soup.find("article")
+        article_txt = article.getText(separator=" ", strip=True)
+        correct = (
+            "the right answer!" in article_txt.lower()
+            and "one gold star" in article_txt.lower()
         )
+
+        if not correct:
+            print(article_txt)
+        # hack for now, will change when get live response next day
+        return correct

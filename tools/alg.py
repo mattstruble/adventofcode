@@ -76,6 +76,25 @@ class Point:
         return str(self)
 
 
+UP, RIGHT, DOWN, LEFT = ORTHO_DIRS = (
+    Point(0, -1),
+    Point(1, 0),
+    Point(0, 1),
+    Point(-1, 0),
+)
+DIRS = {
+    "N": UP,
+    "E": RIGHT,
+    "S": DOWN,
+    "W": LEFT,
+    "U": UP,
+    "R": RIGHT,
+    "L": LEFT,
+    "D": DOWN,
+}
+ALL_DIRS = [Point(x, y) for x in [-1, 0, 1] for y in [-1, 0, 1] if not x == y == 0]
+
+
 class MinHeap:
     def __init__(self, max_size: Optional[int] = None):
         self.max_size = max_size
