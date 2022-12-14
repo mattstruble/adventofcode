@@ -82,6 +82,12 @@ UP, RIGHT, DOWN, LEFT = ORTHO_DIRS = (
     Point(0, 1),
     Point(-1, 0),
 )
+
+DOWN_LEFT = DOWN + LEFT
+DOWN_RIGHT = DOWN + RIGHT
+UP_LEFT = UP + LEFT
+UP_RIGHT = UP + RIGHT
+
 DIRS = {
     "N": UP,
     "E": RIGHT,
@@ -91,6 +97,14 @@ DIRS = {
     "R": RIGHT,
     "L": LEFT,
     "D": DOWN,
+    "NE": UP + RIGHT,
+    "NW": UP + LEFT,
+    "SE": DOWN + RIGHT,
+    "SW": DOWN + LEFT,
+    "UR": UP + RIGHT,
+    "UL": UP + LEFT,
+    "DR": DOWN + RIGHT,
+    "DL": DOWN + LEFT,
 }
 ALL_DIRS = [Point(x, y) for x in [-1, 0, 1] for y in [-1, 0, 1] if not x == y == 0]
 

@@ -46,6 +46,10 @@ def cmp(x, y):
     return (x > y) - (x < y)
 
 
+def minmax(arr: list[Any]) -> Tuple[Any, Any]:
+    return min(arr), max(arr)
+
+
 INPUTS_DIR = os.path.join(os.path.dirname(sys.argv[0]), "inputs")
 os.makedirs(INPUTS_DIR, exist_ok=True)
 
