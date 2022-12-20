@@ -116,12 +116,14 @@ class PuzzleRunner:
             ):
                 break  # break if previous puzzle is wrong
 
+            self.is_test = True
             test_results = self._run_puzzle(
                 puzzle_func=puzzle_func, data_generator=self.get_example
             )
             print(f"TEST {func_name}: {test_results}")
 
             if not test_only:
+                self.is_test = False
                 run_results = self._run_puzzle(
                     puzzle_func=puzzle_func, data_generator=file_line_generator
                 )

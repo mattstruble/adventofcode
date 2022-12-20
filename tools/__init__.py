@@ -5,6 +5,8 @@ import sys
 from math import sqrt
 from typing import Any, Callable, Iterable, List, Tuple, Union
 
+from tools.math import Circle, Point, clamp
+
 
 def str_to_ints(string: str) -> List[int]:
     return list(map(int, re.findall(r"(-?\d+).?", string)))
@@ -36,18 +38,45 @@ def distance(p1, p2) -> float:
     return sqrt(pow(p1[0] - p2[0], 2) + pow(p1[1] - p2[1], 2))
 
 
-def clamp(
-    n: Union[int, float], smallest: Union[int, float], largest: Union[int, float]
-) -> Union[int, float]:
-    return max(smallest, min(n, largest))
-
-
 def cmp(x, y):
     return (x > y) - (x < y)
 
 
 def minmax(arr: list[Any]) -> Tuple[Any, Any]:
     return min(arr), max(arr)
+
+
+UP, RIGHT, DOWN, LEFT = ORTHO_DIRS = (
+    Point(0, -1),
+    Point(1, 0),
+    Point(0, 1),
+    Point(-1, 0),
+)
+
+DOWN_LEFT = DOWN + LEFT
+DOWN_RIGHT = DOWN + RIGHT
+UP_LEFT = UP + LEFT
+UP_RIGHT = UP + RIGHT
+
+DIRS = {
+    "N": UP,
+    "E": RIGHT,
+    "S": DOWN,
+    "W": LEFT,
+    "U": UP,
+    "R": RIGHT,
+    "L": LEFT,
+    "D": DOWN,
+    "NE": UP + RIGHT,
+    "NW": UP + LEFT,
+    "SE": DOWN + RIGHT,
+    "SW": DOWN + LEFT,
+    "UR": UP + RIGHT,
+    "UL": UP + LEFT,
+    "DR": DOWN + RIGHT,
+    "DL": DOWN + LEFT,
+}
+ALL_DIRS = [Point(x, y) for x in [-1, 0, 1] for y in [-1, 0, 1] if not x == y == 0]
 
 
 INPUTS_DIR = os.path.join(os.path.dirname(sys.argv[0]), "inputs")
