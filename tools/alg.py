@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 import heapq
+from collections import deque
 from typing import Any, Optional
+
+from tools.utils import memoize
 
 
 class MinHeap:
@@ -97,6 +100,18 @@ class Node:
     def __repr__(self) -> str:
         return str(self)
 
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, Node)
+            and other.name == self.name
+            and other.value == self.value
+            and other.children == self.children
+            and other.parent == self.parent
+        )
+
+    def __hash__(self) -> int:
+        return hash((self.name, self.value, self.parent, tuple(self.children)))
+
     @staticmethod
     def iterator(root: "Node"):
         queue = [root]
@@ -108,3 +123,29 @@ class Node:
                 yield node
 
                 queue.extend(node.children.values())
+
+    @staticmethod
+    @memoize
+    def BFS(start: "Node", end: "Node") -> list["Node"]:
+        q = deque([[start]])
+        visited = set()
+
+        if start == end:
+            return [start]
+
+        while len(q):
+            path = q.popleft()
+            node = path[-1]
+
+            if node not in visited:
+                for neighbor in node.children.values():
+                    new_path = list(path)
+                    new_path.append(neighbor)
+                    q.append(new_path)
+
+                    if neighbor == end:
+                        return new_path
+
+                visited.add(node)
+
+        return []

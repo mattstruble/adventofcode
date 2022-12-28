@@ -90,3 +90,38 @@ os.makedirs(CACHE_DIR, exist_ok=True)
 
 LETTERS = "abcdefghijklmnopqrstuvwxyz"
 NUMBERS = "0123456789"
+
+
+class ImmutableList(list):
+    def append(self, object: object) -> list:
+        new_list = list(self.copy())
+        new_list.append(object)
+
+        return ImmutableList(new_list)
+
+    def remove(self, __value: object) -> list:
+        new_list = list(self.copy())
+        new_list.remove(object)
+
+        return ImmutableList(new_list)
+
+
+def partition(collection: Iterable, min: int, k: int) -> Iterable:
+    if len(collection) == 1:
+        yield [collection]
+
+    first = collection[0]
+    for smaller in partition(collection[1:], min - 1, k):
+        if len(smaller) > k:
+            continue
+
+        if len(smaller) >= min:
+            for n, subset in enumerate(smaller):
+                yield smaller[:n] + [[first] + subset] + smaller[n + 1 :]
+
+        if len(smaller) < k:
+            yield [[first]] + smaller
+
+
+def subsets(collection: Iterable, k: int) -> Iterable:
+    yield from partition(collection, k, k)

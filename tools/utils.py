@@ -54,3 +54,17 @@ def extract_year_from_path(file_path: Optional[str] = None) -> int:
     filename = Path(os.path.dirname(file_path)).stem
 
     return int(filename)
+
+
+def memoize(fn):
+    memo = {}
+
+    def memoized(*args):
+        if args in memo:
+            return memo[args]
+        else:
+            result = fn(*args)
+            memo[args] = result
+            return result
+
+    return memoized
