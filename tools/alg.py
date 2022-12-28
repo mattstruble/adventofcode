@@ -149,3 +149,29 @@ class Node:
                 visited.add(node)
 
         return []
+
+    @staticmethod
+    @memoize
+    def DFS(start: "Node", end: "Node") -> list["Node"]:
+        if start == end:
+            return [start]
+
+        stack = [[start]]
+        visited = set()
+
+        while len(stack):
+            path = stack.pop()
+            node = path[-1]
+
+            if node not in visited:
+                for neighbor in node.children.values():
+                    new_path = list(path)
+                    new_path.append(neighbor)
+                    stack.append(new_path)
+
+                    if neighbor == end:
+                        return new_path
+
+                visited.add(node)
+
+        return []

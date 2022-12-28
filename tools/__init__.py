@@ -46,6 +46,10 @@ def minmax(arr: list[Any]) -> Tuple[Any, Any]:
     return min(arr), max(arr)
 
 
+def arr_to_key(arr: list[Any]) -> str:
+    return ",".join(sorted(arr))
+
+
 UP, RIGHT, DOWN, LEFT = ORTHO_DIRS = (
     Point(0, -1),
     Point(1, 0),
@@ -106,9 +110,14 @@ class ImmutableList(list):
         return ImmutableList(new_list)
 
 
+def subsets(collection: Iterable, k: int) -> Iterable:
+    yield from partition(collection, k, k)
+
+
 def partition(collection: Iterable, min: int, k: int) -> Iterable:
     if len(collection) == 1:
         yield [collection]
+        return
 
     first = collection[0]
     for smaller in partition(collection[1:], min - 1, k):
@@ -121,7 +130,3 @@ def partition(collection: Iterable, min: int, k: int) -> Iterable:
 
         if len(smaller) < k:
             yield [[first]] + smaller
-
-
-def subsets(collection: Iterable, k: int) -> Iterable:
-    yield from partition(collection, k, k)

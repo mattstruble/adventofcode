@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 import re
+from collections import defaultdict
 from typing import Set
 
-from tools import Any, ImmutableList, Tuple, str_to_ints
+from tools import Any, ImmutableList, Tuple, arr_to_key, str_to_ints, subsets
 from tools.alg import Node
 from tools.runner import PuzzleRunner
 
 OPEN_TIME = 1
+
+
+def nodes_to_names(arr: list[Node]) -> list[str]:
+    return [node.name for node in arr]
 
 
 class Day16(PuzzleRunner):
@@ -37,11 +42,11 @@ class Day16(PuzzleRunner):
 
         return valve_info_dict["AA"]["node"], valves
 
-    def maximize_release(self, start: Node, valves: Set[Node], time_limit=30) -> int:
+    def maximize_release(self, start: Node, valves: Set[Node], time_limit=30) -> dict:
         target_valves = list(filter(lambda v: v.value > 0, valves))
-        max_pressure = 0
 
         stack = [[ImmutableList([start]), 0, {}]]
+        path_pressures = defaultdict(lambda: 0)
 
         while len(stack):
             path, minutes_elapesed, opened_valves = stack.pop()
@@ -54,7 +59,9 @@ class Day16(PuzzleRunner):
                     minutes = max(time_limit - time_opened, 0)
                     pressure += valve.value * minutes
 
-                max_pressure = max(max_pressure, pressure)
+                path_pressures[arr_to_key(nodes_to_names(path))] = max(
+                    path_pressures[arr_to_key(nodes_to_names(path))], pressure
+                )
             else:
                 for next_node in target_valves:
                     if next_node not in opened_valves.keys():
@@ -69,15 +76,36 @@ class Day16(PuzzleRunner):
                             [path.append(next_node), elapsed_time, next_open_valves]
                         )
 
-        return max_pressure
+        return path_pressures
 
     def puzzle_one(self, data: list[str]) -> int:
         root, nodes = self.generate_node_graph(data)
+        path_pressures = self.maximize_release(root, nodes)
 
-        return self.maximize_release(root, nodes)
+        return max(path_pressures.values())
 
     def puzzle_one_example_solution(self) -> Any:
         return 1651
+
+    def puzzle_two(self, data: list[str]) -> int:
+        root, nodes = self.generate_node_graph(data)
+        path_pressures = self.maximize_release(root, nodes, time_limit=26)
+
+        target_valves = list(filter(lambda v: v.value > 0, nodes))
+
+        max_pressure = 0
+        for subset in subsets(list(target_valves), 2):
+            my_pressure = path_pressures[arr_to_key(nodes_to_names([root] + subset[0]))]
+            elephant_pressure = path_pressures[
+                arr_to_key(nodes_to_names([root] + subset[1]))
+            ]
+
+            max_pressure = max(max_pressure, my_pressure + elephant_pressure)
+
+        return max_pressure
+
+    def puzzle_two_example_solution(self) -> Any:
+        return 1707
 
 
 Day16()
