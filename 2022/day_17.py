@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from itertools import cycle
 
-from tools import DOWN, LEFT, RIGHT, UP, Any, Point
+from tools import DOWN, LEFT, RIGHT, UP, Any, Point, Tuple
 from tools.math import ComplexShape, Shape, Square
 from tools.runner import PuzzleRunner
 
@@ -32,9 +32,7 @@ jet_to_dir = {"<": LEFT, ">": RIGHT}
 
 class Day17(PuzzleRunner):
     @staticmethod
-    def move_shape(
-        shape: Shape, chamber: Square, placed_shapes: list[Shape], direction: Point
-    ):
+    def move_shape(shape: Shape, chamber: Square, direction: Point):
         new_shape = shape + direction
         ret_shape = shape
 
@@ -42,7 +40,7 @@ class Day17(PuzzleRunner):
         if (
             0 <= new_shape.left
             and new_shape.right < chamber.width
-            and not any(placed.contains(new_shape) for placed in placed_shapes)
+            and not any(placed.contains(new_shape) for placed in chamber.placed_shapes)
         ):
             ret_shape = new_shape
 
@@ -51,66 +49,114 @@ class Day17(PuzzleRunner):
         return ret_shape
 
     @staticmethod
-    def visualize(chamber: Square, placed_shapes: list[Shape], shape: Shape):
-        min_y = min([shape.top for shape in placed_shapes + [shape]])
-
-        for y in range(min_y, 1, 1):
-            row_str = ""
-            for x in range(chamber.width):
-                if shape.contains(Point(x, y)):
-                    row_str += "@"
-                elif any([placed.contains(Point(x, y)) for placed in placed_shapes]):
-                    row_str += "#"
-                else:
-                    row_str += "."
-            print(row_str)
-
+    def visualize(chamber: Square, shape: Shape):
+        print(Day17.get_recent_formation(chamber, shape))
         input("continue?")
 
     @staticmethod
-    def get_chamber(width=7, height=float("-inf")) -> Square:
+    def get_chamber(width=7, height=0) -> Square:
         return Square(Point(0, 0), width=width, height=height)
 
-    def get_fallen_rocks(self, jets, chamber: Square, num_rocks: int) -> list[Shape]:
-        start_point = Point(2, -3)
-        placed_shapes = []
-        shape_cycle = cycle(SHAPES)
+    @staticmethod
+    def get_recent_formation(chamber: Square, shape: Shape = None) -> str:
+        rows = []
+        min_y = chamber.top - 3
+        max_y = min(0, chamber.top + 20)
+        for y in range(min_y, max_y + 1):
+            row_str = ""
+            for x in range(chamber.width):
+                if any(
+                    placed.contains(Point(x, y)) for placed in chamber.placed_shapes
+                ):
+                    row_str += "#"
+                elif shape and shape.contains(Point(x, y)):
+                    row_str += "@"
+                else:
+                    row_str += "."
+            rows.append(row_str)
 
-        for _ in range(num_rocks):
-            shape = shape_factory(next(shape_cycle), start_point)
-            # print("START", shape)
+        return "\n".join(rows)
 
-            while shape.bottom <= 0:
-                shape = self.move_shape(
-                    shape, chamber, placed_shapes, jet_to_dir[next(jets)]
-                )
-                # self.visualize(chamber, placed_shapes, shape)
-                new_shape = self.move_shape(shape, chamber, placed_shapes, DOWN)
+    def drop_shape(self, chamber, jets, shape_cycle, cache) -> Tuple[bool, int, int]:
+        shape_index, shape_str = next(shape_cycle)
+        start_point = Point(2, chamber.top - 3)
+        shape = shape_factory(shape_str, start_point)
 
-                if new_shape == shape:
-                    break
-                elif new_shape.bottom > 0:
-                    new_shape = self.move_shape(new_shape, chamber, [], UP)
-                    break
+        while True:
+            jet_index, jet_str = next(jets)
+            shape = self.move_shape(shape, chamber, jet_to_dir[jet_str])
+            # self.visualize(chamber, shape)
+            new_shape = self.move_shape(shape, chamber, DOWN)
 
-                shape = new_shape
+            if new_shape.bottom > 0:
+                new_shape = self.move_shape(new_shape, chamber, UP)
+                break
 
-            # print("END", new_shape)
-            placed_shapes.append(new_shape)
-            start_point = Point(2, min(start_point.y, new_shape.top - 4))
+            if new_shape == shape:
+                break
 
-        return placed_shapes
+            shape = new_shape
+
+        chamber.placed_shapes.append(new_shape)
+        chamber.height = max(chamber.height, abs(new_shape.top) + 1)
+
+        cache_key = (shape_index, jet_index, self.get_recent_formation(chamber))
+
+        if cache_key in cache:
+            height, shape_ct = cache[cache_key]
+            return (True, height, shape_ct)
+        else:
+            cache[cache_key] = (chamber.height, len(chamber.placed_shapes))
+
+        return (False, 0, 0)
+
+    def get_fallen_rocks(self, jets, chamber: Square, num_rocks: int) -> None:
+        chamber.placed_shapes = []
+        shape_cycle = cycle(enumerate(SHAPES))
+        cache = {}
+
+        cache_hit = False
+        while not cache_hit:
+            cache_hit, cache_height, cache_shape_ct = self.drop_shape(
+                chamber, jets, shape_cycle, cache
+            )
+
+        height_diff = chamber.height - cache_height
+        shapes_diff = len(chamber.placed_shapes) - cache_shape_ct
+
+        remaining_drops = num_rocks - len(chamber.placed_shapes)
+        required_repeats = remaining_drops // shapes_diff
+        remaining_drops %= shapes_diff
+
+        height_delta = height_diff * required_repeats
+
+        for _ in range(remaining_drops):
+            self.drop_shape(chamber, jets, shape_cycle, cache)
+
+        chamber.height += height_delta
 
     def puzzle_one(self, data: list[str]) -> int:
-        jets = cycle(next(data))
+        jets = cycle(enumerate(next(data)))
         chamber = self.get_chamber()
 
-        fallen_rocks = self.get_fallen_rocks(jets, chamber, 2022)
+        self.get_fallen_rocks(jets, chamber, 2022)
 
-        return abs(min(rock.top for rock in fallen_rocks)) + 1
+        return chamber.height
 
     def puzzle_one_example_solution(self) -> Any:
         return 3068
+
+    def puzzle_two(self, data: list[str]) -> int:
+
+        jets = cycle(enumerate(next(data)))
+        chamber = self.get_chamber()
+
+        self.get_fallen_rocks(jets, chamber, 1000000000000)
+
+        return chamber.height
+
+    def puzzle_two_example_solution(self) -> Any:
+        return 1514285714288
 
 
 Day17()
