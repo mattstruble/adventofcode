@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+import itertools
 import math
-from typing import Optional, Protocol, Union
+from typing import Protocol, Union
 
 
 def clamp(
@@ -10,57 +11,186 @@ def clamp(
 
 
 class Point:
-    def __init__(self, x: Union[int, tuple], y: Optional[int] = None):
-        if isinstance(x, tuple) and y is not None:
-            raise ValueError("X cannot be a tuple, and pass in y.")
-        if isinstance(x, tuple) and y is None:
-            self.x = x[0]
-            self.y = x[1]
-        elif y is not None:
-            self.x = x
-            self.y = y
+    def __init__(self, *coordinates, labels=None):
+        self.coordinates = tuple(coordinates)
+        self.labels = labels
+
+    def __iter__(self):
+        return (x for x in self.coordinates)
+
+    def __getitem__(self, index):
+        cls = type(self)
+        if isinstance(index, slice):
+            return cls(self.coordinates[index])
+        if isinstance(index, int):
+            return self.coordinates[index]
+
+        raise TypeError(
+            f"{cls.__name__} indices must be integers or slices, not {type(index).__name__}"
+        )
+
+    def __getattr__(self, name):
+        cls = type(self)
+        msg = f"{cls.__name__} object doesn't have attribute {name}"
+        if self.labels is None:
+            raise AttributeError(msg)
+
+        if len(name) == 1:
+            l = self.labels.find(name)
+            if 0 <= l <= len(self.coordinates):
+                return self.coordinates[l]
+
+        raise AttributeError(msg)
+
+    def __setattr__(self, name, value):
+        if len(name) == 1:
+            if self.labels is not None and name in self.labels:
+                raise AttributeError(f"readonly attribute {name}")
+            elif name.islower():
+                raise AttributeError(
+                    f"cannot set attribute 'a' to 'z' in {type(self).__name__}"
+                )
+
+        super().__setattr__(name, value)
+
+    def __len__(self):
+        return len(self.coordinates)
 
     def __sub__(self, other) -> "Point":
         if isinstance(other, Point):
-            return Point(self.x - other.x, self.y - other.y)
+            label = (
+                self.labels
+                if (other.labels is None or len(other) < len(self))
+                else other.labels
+            )
+            return Point(
+                (a - b for a, b in itertools.zip_longest(self, other, fillvalue=0.0)),
+                labels=label,
+            )
         elif isinstance(other, (float, int)):
-            return Point(self.x - other, self.y - other)
+            return Point(x - other for x in self)
+
+        return NotImplemented
+
+    def __rsub__(self, other) -> "Point":
+        return -(self - other)
+
+    def __neg__(self) -> "Point":
+        return Point(-x for x in self)
 
     def __add__(self, other) -> "Point":
         if isinstance(other, Point):
-            return Point(self.x + other.x, self.y + other.y)
+            label = (
+                self.labels
+                if (other.labels is None or len(other) < len(self))
+                else other.labels
+            )
+            return Point(
+                (a + b for a, b in itertools.zip_longest(self, other, fillvalue=0.0)),
+                labels=label,
+            )
         elif type(other) is (float, int):
-            return Point(self.x + other, self.y + other)
+            return Point(x + other for x in self)
+
+        return NotImplemented
+
+    def __radd__(self, other) -> "Point":
+        return self + other
 
     def __mul__(self, other) -> "Point":
         if isinstance(other, Point):
-            return Point(self.x * other.x, self.y * other.y)
+            label = (
+                self.labels
+                if (other.labels is None or len(other) < len(self))
+                else other.labels
+            )
+            return Point(
+                (a * b for a, b in itertools.zip_longest(self, other, fillvalue=1.0)),
+                labels=label,
+            )
         elif isinstance(other, (float, int)):
-            return Point(self.x * other, self.y * other)
+            return Point(x * other for x in self)
+
+        return NotImplemented
+
+    def __rmul__(self, other) -> "Point":
+        return self * other
 
     def __truediv__(self, other) -> "Point":
         if isinstance(other, Point):
-            return Point(self.x / other.x, self.y / other.y)
+            label = (
+                self.labels
+                if (other.labels is None or len(other) < len(self))
+                else other.labels
+            )
+            return Point(
+                (a / b for a, b in itertools.zip_longest(self, other, fillvalue=1.0)),
+                labels=label,
+            )
         elif isinstance(other, (float, int)):
-            return Point(self.x / other, self.y / other)
+            return Point(x / other for x in self)
+
+        return NotImplemented
+
+    def __rtruediv__(self, other) -> "Point":
+        return self // other
+
+    def __div__(self, other) -> "Point":
+        if isinstance(other, Point):
+            label = (
+                self.labels
+                if (other.labels is None or len(other) < len(self))
+                else other.labels
+            )
+            return Point(
+                (a // b for a, b in itertools.zip_longest(self, other, fillvalue=1.0)),
+                labels=label,
+            )
+        elif isinstance(other, (float, int)):
+            return Point(x // other for x in self)
+
+        return NotImplemented
+
+    def __rdiv__(self, other) -> "Point":
+        return self // other
 
     def __eq__(self, other):
-        return type(other) is (Point, Shape) and self.x == other.x and self.y == other.y
+        return (
+            isinstance(other, Point)
+            and len(self) == len(other)
+            and all(a == b for a, b in zip(self, other))
+        )
 
     def __lt__(self, other):
-        return type(other) is (Point, Shape) and self.x < other.x and self.y < other.y
+        return (
+            isinstance(other, Point)
+            and len(self) == len(other)
+            and all(a < b for a, b in zip(self, other))
+        )
 
     def __le__(self, other):
-        return type(other) is (Point, Shape) and self.x <= other.x and self.y <= other.y
+        return (
+            isinstance(other, Point)
+            and len(self) == len(other)
+            and all(a <= b for a, b in zip(self, other))
+        )
 
     def __gt__(self, other):
-        return type(other) is (Point, Shape) and self.x > other.x and self.y > other.y
+        return (
+            isinstance(other, Point)
+            and len(self) == len(other)
+            and all(a > b for a, b in zip(self, other))
+        )
 
     def __ge__(self, other):
-        return type(other) is (Point, Shape) and self.x >= other.x and self.y >= other.y
+        return (
+            isinstance(other, Point)
+            and len(self) == len(other)
+            and all(a >= b for a, b in zip(self, other))
+        )
 
     def normalise(self) -> "Point":
-        return Point(clamp(self.x, -1, 1), clamp(self.y, -1, 1))
+        return Point(clamp(x, -1, 1) for x in self)
 
     def manhatten(self, other) -> float:
         if not isinstance(other, Point):
@@ -68,7 +198,7 @@ class Point:
                 f"Cannot calculate the distance between Point and [{type(other)}]"
             )
         diff = self - other
-        return sum((abs(diff.x), abs(diff.y)))
+        return sum((abs(x) for x in diff))
 
     def chebyshev(self, other) -> int:
         if not isinstance(other, Point):
@@ -76,7 +206,7 @@ class Point:
                 f"Cannot calculate the distance between Point and [{type(other)}]"
             )
 
-        return max(abs(self.x - other.x), abs(self.y - other.y))
+        return max(abs(a - b for a, b in zip(self, other)))
 
     def distance(self, other, distance_str="manhattan") -> float:
         if distance_str == "manhattan" or distance_str == "m":
@@ -91,10 +221,10 @@ class Point:
         return distance_func(other)
 
     def __hash__(self) -> int:
-        return hash((self.x, self.y))
+        return hash(tuple(self.coordinates))
 
     def __str__(self) -> str:
-        return f"Point({self.x=}, {self.y=})"
+        return f"Point({','.join(str(x) for x in self.coordinates)})"
 
     def __repr__(self) -> str:
         return str(self)
