@@ -30,17 +30,14 @@ class Point:
         )
 
     def __getattr__(self, name):
-        cls = type(self)
-        msg = f"{cls.__name__} object doesn't have attribute {name}"
-        if self.labels is None:
-            raise AttributeError(msg)
-
-        if len(name) == 1:
+        if self.labels and len(name) == 1:
             l = self.labels.find(name)
             if 0 <= l <= len(self.coordinates):
                 return self.coordinates[l]
 
-        raise AttributeError(msg)
+        raise AttributeError(
+            f"{type(self).__name__} object doesn't have attribute {name}"
+        )
 
     def __setattr__(self, name, value):
         if len(name) == 1:
@@ -64,7 +61,7 @@ class Point:
                 else other.labels
             )
             return Point(
-                (a - b for a, b in itertools.zip_longest(self, other, fillvalue=0.0)),
+                *(a - b for a, b in itertools.zip_longest(self, other, fillvalue=0)),
                 labels=label,
             )
         elif isinstance(other, (float, int)):
@@ -86,7 +83,7 @@ class Point:
                 else other.labels
             )
             return Point(
-                (a + b for a, b in itertools.zip_longest(self, other, fillvalue=0.0)),
+                *(a + b for a, b in itertools.zip_longest(self, other, fillvalue=0)),
                 labels=label,
             )
         elif type(other) is (float, int):
@@ -105,7 +102,7 @@ class Point:
                 else other.labels
             )
             return Point(
-                (a * b for a, b in itertools.zip_longest(self, other, fillvalue=1.0)),
+                *(a * b for a, b in itertools.zip_longest(self, other, fillvalue=1)),
                 labels=label,
             )
         elif isinstance(other, (float, int)):
@@ -124,7 +121,7 @@ class Point:
                 else other.labels
             )
             return Point(
-                (a / b for a, b in itertools.zip_longest(self, other, fillvalue=1.0)),
+                *(a / b for a, b in itertools.zip_longest(self, other, fillvalue=1)),
                 labels=label,
             )
         elif isinstance(other, (float, int)):
@@ -143,7 +140,7 @@ class Point:
                 else other.labels
             )
             return Point(
-                (a // b for a, b in itertools.zip_longest(self, other, fillvalue=1.0)),
+                *(a // b for a, b in itertools.zip_longest(self, other, fillvalue=1)),
                 labels=label,
             )
         elif isinstance(other, (float, int)):
