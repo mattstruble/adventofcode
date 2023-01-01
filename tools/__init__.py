@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 import os
 import re
 import sys
@@ -10,6 +11,10 @@ from tools.math import Circle, Point, clamp
 
 def str_to_ints(string: str) -> List[int]:
     return list(map(int, re.findall(r"(-?\d+).?", string)))
+
+
+def dict_to_str(obj: dict) -> str:
+    return json.dumps(obj, sort_keys=True, default=str)
 
 
 def data_to_grid(
