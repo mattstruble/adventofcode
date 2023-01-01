@@ -3,6 +3,7 @@ import math
 from collections import defaultdict, deque
 from copy import deepcopy
 from enum import IntEnum
+from typing import Set
 
 from tools import Any, Iterable, dict_to_str, str_to_ints
 from tools.runner import PuzzleRunner
@@ -74,7 +75,7 @@ class Factory:
 
         self.stockpile = defaultdict(lambda: 0)
 
-        print("FACTORY", self.blueprint_id, self.remaining_time, self.robots)
+        # print("FACTORY", self.blueprint_id, self.remaining_time, self.robots)
 
     def __hash__(self):
         return hash(
@@ -87,9 +88,7 @@ class Factory:
         )
 
     def __str__(self) -> str:
-        return (
-            f"Factory({self.blueprint_id=}, {self.remaining_time=}, {self.stockpile=})"
-        )
+        return f"Factory({self.blueprint_id=}, {self.remaining_time=}, {self.stockpile=}, {self.robots=})"
 
     def __repr__(self) -> str:
         return str(self)
@@ -121,7 +120,7 @@ class Factory:
 
     def can_build(self, robot_name: Materials) -> bool:
         robot = self.robots[robot_name]
-        return all(
+        return self.remaining_time > 0 and all(
             robot["cost_val"][i] <= self.stockpile[material]
             for i, material in enumerate(robot["cost_mat"])
         )
@@ -152,6 +151,7 @@ class Factory:
             self.stockpile[material] += robot["count"] * time
 
         self.remaining_time -= time
+        return self
 
     def get_buildable_robots(self) -> Iterable[Materials]:
         return filter(lambda r: self.can_build(r), reversed(self.BUILD_PRIORITY))
@@ -161,6 +161,80 @@ class Factory:
             lambda r: self.time_to_build(r) < self.remaining_time,
             reversed(self.BUILD_PRIORITY),
         )
+
+    @staticmethod
+    @memoize
+    def get_fastest_robot_build(
+        factory: "Factory", material: Materials, allow_multiple=False
+    ) -> list["Factory"]:
+        if factory.remaining_time == 0 or (
+            factory.robots[material]["count"] > 0 and not allow_multiple
+        ):
+            return [factory]
+
+        if material == Materials.OR:
+            fastest_node = deepcopy(factory)
+            fastest_node.fast_forward(fastest_node.time_to_build(material))
+            if fastest_node.can_build(material):
+                fastest_node.build(material)
+            return [fastest_node]
+
+        # print(f"GET_FASTEST: {factory=}, {material=}\n")
+
+        required_materials = factory.robots[material]["cost_mat"]
+
+        start_factory = min(
+            [
+                max(
+                    Factory.get_fastest_robot_build(factory, m),
+                    key=lambda f: f.remaining_time,
+                )
+                for m in required_materials
+            ],
+            key=lambda f: f.remaining_time,
+        )
+
+        max_remaining_time = start_factory.remaining_time - start_factory.time_to_build(
+            material
+        )
+
+        # print(f"start({material}: {start_factory}, {max_remaining_time}")
+
+        queue = deque([start_factory])
+        visited: Set[Factory] = set([start_factory])
+        max_time_count = 0
+        while len(queue) and max_remaining_time > 0:
+            node = queue.popleft()
+
+            for mat in required_materials:
+                for new_factory in Factory.get_fastest_robot_build(
+                    deepcopy(node), mat, True
+                ):
+                    remaining_time = (
+                        new_factory.remaining_time - new_factory.time_to_build(material)
+                    )
+                    if remaining_time >= max_remaining_time:
+                        max_remaining_time = max(remaining_time, max_remaining_time)
+                        queue.append(new_factory)
+                        max_time_count += 1
+
+            visited.add(node)
+
+        # print(max_time_count)
+        fastest_nodes = list(
+            filter(
+                lambda f: f.remaining_time - f.time_to_build(material)
+                >= max_remaining_time,
+                visited,
+            )
+        )
+        for fastest_node in fastest_nodes:
+            fastest_node.fast_forward(fastest_node.time_to_build(material))
+            if fastest_node.can_build(material):
+                fastest_node.build(material)
+
+        # print(f"FASTEST {material}: {fastest_node=}\n")
+        return fastest_nodes
 
     @staticmethod
     @memoize
@@ -214,57 +288,26 @@ Blueprint 2: Each or robot costs 2 or. Each clay robot costs 3 or. Each obsidian
             )
 
     def process_factory(self, factory: Factory) -> list[Factory]:
-        queue = deque([factory])
-        finished = []
 
         greedy_factory = Factory.get_greedy_build(factory)
-        max_geode = greedy_factory.stockpile[Materials.GEODE]
+        greedy_factory.stockpile[Materials.GEODE]
+        fastest_nodes = Factory.get_fastest_robot_build(factory, Materials.GEODE)
 
-        """
-        TODO: STore the max_geode and use that to calculate and trim the stack?
-        We can calculate the maximum potential geodes of a node and kill it early if it won't break the curr max
+        completed = set()
+        visited = set()
+        while len(fastest_nodes):
+            for node in Factory.get_fastest_robot_build(
+                deepcopy(fastest_nodes.pop()), Materials.GEODE, True
+            ):
+                if node.remaining_time > 0 and node not in visited:
+                    fastest_nodes.append(node)
+                    visited.add(node)
+                else:
+                    completed.add(node.fast_forward(node.remaining_time))
 
-        Also, optimize to building out geode smashers, cause a lot of things are finishing with 0 geodes, which defeats
-        the purpose if everything is just building clay / or perpetually. It needs to build with purpose.
-        """
-        while len(queue):
-            node = queue.popleft()
-            greedy_node = Factory.get_greedy_build(node)
-
-            if greedy_node.stockpile[Materials.GEODE] < max_geode:
-                continue
-
-            for buildable in node.get_buildable_robots():
-                new_factory = deepcopy(node)
-                # print("buildable now")
-                new_factory.build(buildable)
-                if (
-                    Factory.get_greedy_build(new_factory).stockpile[Materials.GEODE]
-                    >= max_geode
-                ):
-                    queue.append(new_factory)
-
-            for future in node.get_future_buildable_robots():
-                new_factory = deepcopy(node)
-                new_factory.fast_forward(new_factory.time_to_build(future))
-                # print("fastforward to future build")
-                new_factory.build(future)
-                if (
-                    Factory.get_greedy_build(new_factory).stockpile[Materials.GEODE]
-                    >= max_geode
-                ):
-                    queue.append(new_factory)
-
-            # if greedy_node.stockpile[Materials.GEODE] > max_geode:
-            finished.append(greedy_node)
-            max_geode = max(max_geode, greedy_node.stockpile[Materials.GEODE])
-            if len(finished) % 10000 == 0:
-                print(len(finished), len(queue), max_geode, finished[-1].stockpile)
-
-            # queue = deque(sorted(queue, reverse=True, key=lambda f: Factory.get_greedy_build(f).stockpile[Materials.GEODE]))
-
-        print(max_geode)
-        return finished
+        # fastest_geode.fast_forward(fastest_geode.remaining_time)
+        # print(fastest_geode)
+        return completed
 
     def puzzle_one(self, data: list[str]) -> int:
         geodes = []
@@ -273,6 +316,7 @@ Blueprint 2: Each or robot costs 2 or. Each clay robot costs 3 or. Each obsidian
                 [f.stockpile[Materials.GEODE] for f in self.process_factory(factory)]
             )
             geodes.append(max_geode * factory.blueprint_id)
+            print(f"{factory.blueprint_id=}: {max_geode}")
 
         return sum(geodes)
 
