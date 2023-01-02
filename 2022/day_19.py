@@ -304,12 +304,11 @@ Blueprint 2: Each or robot costs 2 or. Each clay robot costs 3 or. Each obsidian
     def process_factory(self, factory: Factory) -> list[Factory]:
 
         greedy_factory = Factory.get_greedy_build(factory)
-        greedy_factory.stockpile[Materials.GEODE]
         fastest_nodes = Factory.get_fastest_robot_build(factory, Materials.GEODE)
 
         completed = set()
         visited = set()
-        max_seen_geode = 0
+        max_seen_geode = greedy_factory.stockpile[Materials.GEODE]
         # fastest_nodes = sorted(fastest_nodes, key= lambda f: Factory.get_greedy_build(f).stockpile[Materials.GEODE])
         queue = deque(fastest_nodes)
         while len(queue):
@@ -321,22 +320,17 @@ Blueprint 2: Each or robot costs 2 or. Each clay robot costs 3 or. Each obsidian
             if curr_node in visited or curr_node in completed:
                 continue
 
-            if (
-                curr_node.remaining_time <= 0
-                or Factory.get_greedy_build(curr_node).stockpile[Materials.GEODE]
-                < max_seen_geode
-            ):
-                visited.add(curr_node)
-                completed.add(Factory.get_greedy_build(curr_node))
-                continue
+            greedy_node = Factory.get_greedy_build(curr_node)
 
-            if curr_node.remaining_time >= curr_node.time_to_build(Materials.GEODE):
+            if (
+                0 < curr_node.remaining_time >= curr_node.time_to_build(Materials.GEODE)
+                and greedy_node.stockpile[Materials.GEODE] >= max_seen_geode
+            ):
                 for next_node in Factory.get_fastest_robot_build(
                     deepcopy(curr_node), Materials.GEODE, True
                 ):
                     queue.append(next_node)
 
-            greedy_node = Factory.get_greedy_build(curr_node)
             max_seen_geode = max(greedy_node.stockpile[Materials.GEODE], max_seen_geode)
 
             visited.add(curr_node)
