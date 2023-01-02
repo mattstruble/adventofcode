@@ -315,29 +315,32 @@ Blueprint 2: Each or robot costs 2 or. Each clay robot costs 3 or. Each obsidian
         while len(queue):
             curr_node = queue.pop()
 
-            # if len(queue) % 10 == 0:
-            #     print(len(queue), max_seen_geode)
+            if len(visited) % 100 == 0:
+                print(f"{len(visited)=}, {len(queue)=}, {max_seen_geode=}")
+
+            if curr_node in visited or curr_node in completed:
+                continue
 
             if (
-                curr_node in visited
-                or curr_node.remaining_time <= 0
+                curr_node.remaining_time <= 0
                 or Factory.get_greedy_build(curr_node).stockpile[Materials.GEODE]
                 < max_seen_geode
             ):
+                visited.add(curr_node)
+                completed.add(Factory.get_greedy_build(curr_node))
                 continue
 
-            if curr_node.remaining_time >= curr_node.time_to_build(Materials.GEODE) + 1:
+            if curr_node.remaining_time >= curr_node.time_to_build(Materials.GEODE):
                 for next_node in Factory.get_fastest_robot_build(
                     deepcopy(curr_node), Materials.GEODE, True
                 ):
                     queue.append(next_node)
 
             greedy_node = Factory.get_greedy_build(curr_node)
-            completed.add(greedy_node)
             max_seen_geode = max(greedy_node.stockpile[Materials.GEODE], max_seen_geode)
 
             visited.add(curr_node)
-            visited.add(greedy_node)
+            completed.add(greedy_node)
 
         # fastest_geode.fast_forward(fastest_geode.remaining_time)
         print(f"{len(visited)=}")
