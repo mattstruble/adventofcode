@@ -41,6 +41,7 @@ In the example above, this is 24000 (carried by the fourth Elf).
 
 Find the Elf carrying the most Calories. How many total Calories is that Elf carrying?
 """
+
 from tools.alg import MinHeap
 from tools.utils import file_line_generator
 
